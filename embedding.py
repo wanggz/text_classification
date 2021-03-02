@@ -51,13 +51,8 @@ class Embedding(metaclass=SingletonMetaclass):
         # 读取停止词
         #
     def read_stopwords_file(self):
-        lines = []
-        with open('data/stopwords.txt', 'r') as f1:
-            list1 = f1.readlines()
-            for line in list1:
-                line = line.rstrip('\n').rstrip('\r')
-                lines.append(line)
-        return lines
+        stopWords = [x.strip() for x in open('./data/stopwords.txt').readlines()]
+        return stopWords
 
     def load_data(self, path):
         '''
@@ -73,11 +68,11 @@ class Embedding(metaclass=SingletonMetaclass):
         # 对data['text']中的词进行分割，并去除停用词 参考格式： data['text'] = data["text"].apply(lambda x: " ".join(x))
         #
         stopwords = self.read_stopwords_file()
-        data['text'] = data["text"].apply(lambda x: " ".join(filter(lambda y: y not in stopwords, x.split(' '))))
+        data['text'] = data["text"].apply(lambda x: " ".join([w for w in x.split() if w not in stopwords and w != '']))
 
         self.labelToIndex = label2idx(data)
         data['label'] = data['label'].map(self.labelToIndex)
-        data['label'] = data.apply(lambda row: float(row['label']), axis=1)
+        #data['label'] = data.apply(lambda row: float(row['label']), axis=1)
         data = data[['text', 'label']]
         
 #         self.train, _, _ = np.split(data[['text', 'label']].sample(frac=1), [int(data.shape[0] * 0.7), int(data.shape[0] * 0.9)])
